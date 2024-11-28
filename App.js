@@ -15,9 +15,9 @@ const SmartHumidifier = () => {
   const [humidity, setHumidity] = useState(70);
   const [temperature, setTemperature] = useState(30);
   const [servoActivated, setServoActivated] = useState(false);
-  const [humidityThreshold, setHumidityThreshold] = useState(50); // State for threshold
+  const [humidityThreshold, setHumidityThreshold] = useState(50); 
 
-  // Fetch sensor data from Flask API
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -28,7 +28,7 @@ const SmartHumidifier = () => {
           setHumidity(data.humidity);
           setTemperature(data.temperature);
           setServoActivated(data.servo_activated);
-          setHumidityThreshold(data.threshold); // Update threshold from backend
+          setHumidityThreshold(data.threshold); 
         } else {
           console.error("Error fetching sensor data:", data.error);
         }
@@ -38,9 +38,9 @@ const SmartHumidifier = () => {
     };
 
     fetchData();
-  }, []); // Fetch data once when component mounts
+  }, []); 
 
-  // Update the threshold on the backend
+
   const updateThreshold = async (newThreshold) => {
     try {
       const response = await fetch("http://10.22.84.78:5000/update-threshold", {
@@ -53,7 +53,7 @@ const SmartHumidifier = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setHumidityThreshold(data.threshold); // Update the local threshold state
+        setHumidityThreshold(data.threshold); 
       } else {
         console.error("Error updating threshold:", data.error);
       }
@@ -65,10 +65,10 @@ const SmartHumidifier = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Title */}
+        {}
         <Text style={styles.title}>Smart Humidifier</Text>
 
-        {/* Display sensor data */}
+        {}
         <View style={styles.statusContainer}>
           <Text style={styles.statusText}>Humidity: {humidity}%</Text>
           <Text style={styles.statusText}>
@@ -79,7 +79,7 @@ const SmartHumidifier = () => {
           </Text>
         </View>
 
-        {/* Set humidity threshold */}
+        {}
         <Text style={styles.sectionTitle}>Set Humidity Threshold</Text>
         <View style={styles.sliderContainer}>
           <Text style={styles.thresholdLabel}>
@@ -93,7 +93,8 @@ const SmartHumidifier = () => {
             value={humidityThreshold}
             onValueChange={(value) => {
               setHumidityThreshold(value);
-              updateThreshold(value); // Send updated value to backend
+              // Send updated value to backend
+              updateThreshold(value); 
             }}
           />
         </View>
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: width * 0.05,
     padding: width * 0.06,
-    alignItems: "flex-start", // Align everything to the left
+    alignItems: "flex-start", 
     backgroundColor: "#1C1C1C",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: "600",
     letterSpacing: 2,
-    textAlign: "left", // Align the title to the left
+    textAlign: "left",
     marginBottom: 20,
   },
   statusContainer: {
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "400",
     marginVertical: 5,
-    textAlign: "left", // Align text to the left
+    textAlign: "left", 
   },
   sectionTitle: {
     color: "#FFFFFF",
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 30,
     letterSpacing: 1.5,
-    textAlign: "left", // Align section title to the left
+    textAlign: "left", 
   },
   sliderContainer: {
     width: "80%",
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "600",
-    textAlign: "left", // Align threshold label to the left
+    textAlign: "left",
   },
   slider: {
     width: "100%",
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     color: "#B0B0B0",
     fontSize: 14,
     marginTop: 15,
-    textAlign: "left", // Align note text to the left
+    textAlign: "left", 
     fontStyle: "italic",
   },
 });
