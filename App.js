@@ -41,7 +41,7 @@ const SmartHumidifier = () => {
 
   const updateThreshold = async (newThreshold) => {
     try {
-      const response = await fetch("http://10.22.84.78:5000/update-threshold", {
+      const response = await fetch("http://10.22.85.174:5000/update-threshold", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

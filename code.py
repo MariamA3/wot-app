@@ -38,36 +38,6 @@ def sensor_data():
         temperature = data["temperature_c"]
         humidity = data["humidity"]
 
-        # Check if humidity is lower than 50% and activate the servo and motor if not already activated
-        if humidity < 89 and not servo_activated:
-            # Activate servo
-            print("Activating servo...")
-            servo.min()  # Move to 90°
-            time.sleep(1)  # Hold for 1 second
-            servo.max()  # Move servo to 180°
-
-            # Send command to micro:bit for motor
-            if ser:
-                print("Sending TOGGLE command to micro:bit for motor.")
-                ser.write("TOGGLE\n".encode("utf-8"))
-                ser.flush()
-                print("TOGGLE command sent!")
-
-            # Set activation flag
-            servo_activated = True
-
-        # Check if humidity goes above 50%
-        elif humidity >= 50 and servo_activated:
-            # Reset the servo and stop motor (if needed)
-            print("Humidity above 50%, resetting servo position...")
-            servo.min()  # Move back to 90° (or stop servo at default position)
-            time.sleep(1)  # Hold for 1 second
-            servo.max()  # Move servo to 180° (can be adjusted as needed)
-            time.sleep(6)
-
-            # Reset activation flag
-            servo_activated = False
-
         # Return sensor data and servo activation status
         return jsonify({
             "temperature": temperature,
@@ -79,8 +49,43 @@ def sensor_data():
             "error": "Failed to read sensor data"
         }), 500
 
-# Initialize Flask app
-app = Flask(__name__)
+# Separate route for controlling the servo based on humidity
+@app.route("/servo-control", methods=["GET"])
+def control_servo():
+    global servo_activated
+    data = get_sensor_data()  # Fetch temperature and humidity data
+
+    if data:
+        humidity = data["humidity"]
+
+        # Check if humidity is lower than 89% and activate the servo if not already activated
+        if humidity < 89 and not servo_activated:
+            print("Activating servo...")
+            servo.min()  # Move to 90°
+            time.sleep(1)  # Hold for 1 second
+            servo.max()  # Move servo to 180°
+
+            # Set activation flag
+            servo_activated = True
+
+        # Check if humidity goes above 50% and reset servo
+        elif humidity >= 50 and servo_activated:
+            print("Humidity above 50%, resetting servo position...")
+            servo.min()  # Move back to 90° (or stop servo at default position)
+            time.sleep(1)  # Hold for 1 second
+            servo.max()  # Move servo to 180° (can be adjusted as needed)
+            time.sleep(6)
+
+            # Reset activation flag
+            servo_activated = False
+
+        return jsonify({
+            "servo_activated": servo_activated
+        })
+    else:
+        return jsonify({
+            "error": "Failed to read sensor data"
+        }), 500
 
 # Motor state
 motor_running = False
@@ -106,4 +111,7 @@ def toggle_motor():
             ser.flush()
         return jsonify({"motor_running": motor_running})
     
-    return jsonify({"error": "Invalid action"}), 400
+    return jsonify({"error": "Invalid action"}), 400  
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
