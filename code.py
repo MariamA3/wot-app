@@ -79,23 +79,31 @@ def sensor_data():
             "error": "Failed to read sensor data"
         }), 500
 
+# Initialize Flask app
+app = Flask(__name__)
+
+# Motor state
+motor_running = False
+
 @app.route("/toggle-motor", methods=["POST"])
 def toggle_motor():
-    global servo_activated
-    if ser:
-        # Toggle motor using the micro:bit
-        try:
-            print("Manual motor toggle requested...")
-            ser.write("TOGGLE\n".encode("utf-8"))
+    global motor_running
+    data = request.json  # Expecting {"action": "start"} or {"action": "stop"}
+    
+    if data["action"] == "start":
+        # Start motor
+        motor_running = True
+        if ser:
+            ser.write("MOTOR_START\n".encode("utf-8"))
             ser.flush()
-            servo_activated = not servo_activated  # Toggle the activation state
-            print(f"Motor {'activated' if servo_activated else 'deactivated'}")
-            return jsonify({"servo_activated": servo_activated})
-        except Exception as e:
-            print(f"Error toggling motor: {e}")
-            return jsonify({"error": "Failed to toggle motor"}), 500
-    else:
-        return jsonify({"error": "Micro:bit not connected"}), 500
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+        return jsonify({"motor_running": motor_running})
+    
+    elif data["action"] == "stop":
+        # Stop motor
+        motor_running = False
+        if ser:
+            ser.write("MOTOR_STOP\n".encode("utf-8"))
+            ser.flush()
+        return jsonify({"motor_running": motor_running})
+    
+    return jsonify({"error": "Invalid action"}), 400

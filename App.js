@@ -18,10 +18,11 @@ const SmartHumidifier = () => {
   const [humidityThreshold, setHumidityThreshold] = useState(50);
   const [manualServoActivated, setManualServoActivated] = useState(false);
 
+  //Husk å endre ip adresse hver ny forsøk.
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://10.22.84.78:5000/sensor-data");
+        const response = await fetch("http://10.22.85.174:5000/sensor-data");
         const data = await response.json();
         if (response.ok) {
           setHumidity(data.humidity);
@@ -61,7 +62,7 @@ const SmartHumidifier = () => {
 
   const toggleMotor = async () => {
     try {
-      const response = await fetch("http://10.22.84.78:5000/toggle-motor", {
+      const response = await fetch("http://10.22.85.174:5000/toggle-motor", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
