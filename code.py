@@ -1,5 +1,5 @@
 import time
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from gpiozero.pins.pigpio import PiGPIOFactory
 from gpiozero import Servo
 import serial
@@ -44,7 +44,7 @@ def sensor_data():
             print("Activating servo...")
             servo.min()  # Move to 90°
             time.sleep(1)  # Hold for 1 second
-            servo.max() # Move servo to 180°
+            servo.max()  # Move servo to 180°
 
             # Send command to micro:bit for motor
             if ser:
@@ -78,6 +78,24 @@ def sensor_data():
         return jsonify({
             "error": "Failed to read sensor data"
         }), 500
+
+@app.route("/toggle-motor", methods=["POST"])
+def toggle_motor():
+    global servo_activated
+    if ser:
+        # Toggle motor using the micro:bit
+        try:
+            print("Manual motor toggle requested...")
+            ser.write("TOGGLE\n".encode("utf-8"))
+            ser.flush()
+            servo_activated = not servo_activated  # Toggle the activation state
+            print(f"Motor {'activated' if servo_activated else 'deactivated'}")
+            return jsonify({"servo_activated": servo_activated})
+        except Exception as e:
+            print(f"Error toggling motor: {e}")
+            return jsonify({"error": "Failed to toggle motor"}), 500
+    else:
+        return jsonify({"error": "Micro:bit not connected"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

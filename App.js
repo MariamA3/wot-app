@@ -15,20 +15,18 @@ const SmartHumidifier = () => {
   const [humidity, setHumidity] = useState(70);
   const [temperature, setTemperature] = useState(30);
   const [servoActivated, setServoActivated] = useState(false);
-  const [humidityThreshold, setHumidityThreshold] = useState(50); 
+  const [humidityThreshold, setHumidityThreshold] = useState(50);
+  const [manualServoActivated, setManualServoActivated] = useState(false);
 
-  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://10.22.84.78:5000/sensor-data");
         const data = await response.json();
-
         if (response.ok) {
           setHumidity(data.humidity);
           setTemperature(data.temperature);
           setServoActivated(data.servo_activated);
-          setHumidityThreshold(data.threshold); 
         } else {
           console.error("Error fetching sensor data:", data.error);
         }
@@ -38,8 +36,7 @@ const SmartHumidifier = () => {
     };
 
     fetchData();
-  }, []); 
-
+  }, []);
 
   const updateThreshold = async (newThreshold) => {
     try {
@@ -53,7 +50,7 @@ const SmartHumidifier = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setHumidityThreshold(data.threshold); 
+        setHumidityThreshold(data.threshold);
       } else {
         console.error("Error updating threshold:", data.error);
       }
@@ -62,13 +59,29 @@ const SmartHumidifier = () => {
     }
   };
 
+  const toggleMotor = async () => {
+    try {
+      const response = await fetch("http://10.22.84.78:5000/toggle-motor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setManualServoActivated(data.servo_activated);
+      } else {
+        console.error("Error toggling motor:", data.error);
+      }
+    } catch (error) {
+      console.error("Error sending motor toggle request:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {}
         <Text style={styles.title}>Smart Humidifier</Text>
-
-        {}
         <View style={styles.statusContainer}>
           <Text style={styles.statusText}>Humidity: {humidity}%</Text>
           <Text style={styles.statusText}>
@@ -78,8 +91,6 @@ const SmartHumidifier = () => {
             Servo {servoActivated ? "Activated" : "Deactivated"}
           </Text>
         </View>
-
-        {}
         <Text style={styles.sectionTitle}>Set Humidity Threshold</Text>
         <View style={styles.sliderContainer}>
           <Text style={styles.thresholdLabel}>
@@ -93,12 +104,15 @@ const SmartHumidifier = () => {
             value={humidityThreshold}
             onValueChange={(value) => {
               setHumidityThreshold(value);
-              // Send updated value to backend
-              updateThreshold(value); 
+              updateThreshold(value);
             }}
           />
         </View>
-
+        <TouchableOpacity style={styles.button} onPress={toggleMotor}>
+          <Text style={styles.buttonText}>
+            {manualServoActivated ? "Turn Off Motor" : "Turn On Motor"}
+          </Text>
+        </TouchableOpacity>
         <Text style={styles.note}>
           * Set recommended humidity for your environment.
         </Text>
@@ -106,6 +120,7 @@ const SmartHumidifier = () => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -172,6 +187,19 @@ const styles = StyleSheet.create({
     textAlign: "left", 
     fontStyle: "italic",
   },
+  button: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  
 });
 
 export default SmartHumidifier;
