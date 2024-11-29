@@ -62,15 +62,17 @@ const SmartHumidifier = () => {
 
   const toggleMotor = async () => {
     try {
+      const action = manualServoActivated ? "stop" : "start"; // Decide action based on state
       const response = await fetch("http://10.22.85.174:5000/toggle-motor", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ action }),
       });
       const data = await response.json();
       if (response.ok) {
-        setManualServoActivated(data.servo_activated);
+        setManualServoActivated(data.motor_running); // Update state
       } else {
         console.error("Error toggling motor:", data.error);
       }
@@ -78,6 +80,7 @@ const SmartHumidifier = () => {
       console.error("Error sending motor toggle request:", error);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
